@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "net.tokyosu.itemoverlayborder.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "itemoverlayborder.refmap.json",
+  "minVersion": "0.8",
+  "client": [
+    "AbstractContainerScreenMixin",
+    "GuiMixin"
+  ],
+  "mixins": [
+    "ItemStackBatchRendererMixin"
+  ]
+}
