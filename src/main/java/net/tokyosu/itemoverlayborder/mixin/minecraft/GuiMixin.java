@@ -10,11 +10,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = Gui.class, priority = 500)
+@Mixin(Gui.class)
 public class GuiMixin {
-    @Inject(method = "renderSlot", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/GuiGraphics;renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V", shift = At.Shift.AFTER))
-    public void renderSlot(GuiGraphics graphics, int x, int y, float p_281885_, Player p_283644_, ItemStack stack, int p_283261_, CallbackInfo ci) {
+    @Inject(method = "renderSlot", at = @At("HEAD"))
+    public void renderSlot(GuiGraphics graphics, int x, int y, float delta, Player player, ItemStack stack, int p_283261_, CallbackInfo ci) {
+        if (stack.isEmpty()) return;
         BorderRenderer.render(graphics, x, y, stack);
     }
 }

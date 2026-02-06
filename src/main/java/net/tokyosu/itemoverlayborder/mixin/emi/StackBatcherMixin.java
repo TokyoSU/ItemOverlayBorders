@@ -12,8 +12,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = StackBatcher.class, remap = false)
 public abstract class StackBatcherMixin {
     @Inject(method = "render(Ldev/emi/emi/api/stack/EmiIngredient;Lnet/minecraft/client/gui/GuiGraphics;IIF)V", at = @At("TAIL"))
-    public void render(EmiIngredient stack, GuiGraphics draw, int x, int y, float delta, CallbackInfo ci) {
-        final var is = stack.getEmiStacks().get(0).getItemStack();
-        BorderRenderer.render(draw, x, y, is);
+    public void render(EmiIngredient ingredient, GuiGraphics draw, int x, int y, float delta, CallbackInfo ci) {
+        final var stack = ingredient.getEmiStacks().get(0).getItemStack();
+        if (stack.isEmpty()) return;
+        BorderRenderer.render(draw, x, y, stack);
     }
 }

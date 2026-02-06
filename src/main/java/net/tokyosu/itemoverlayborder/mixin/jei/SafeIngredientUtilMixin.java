@@ -16,6 +16,7 @@ public class SafeIngredientUtilMixin {
     @Inject(method = "render(Lnet/minecraft/client/gui/GuiGraphics;Lmezz/jei/api/ingredients/IIngredientRenderer;Lmezz/jei/api/ingredients/IIngredientType;Ljava/lang/Object;II)V", at = @At("TAIL"))
     private static <T> void render(GuiGraphics guiGraphics, IIngredientRenderer<T> ingredientRenderer, IIngredientType<T> ingredientType, T ingredient, int x, int y, CallbackInfo ci) {
         if (ingredient instanceof ItemStack stack) {
+            if (stack.isEmpty()) return;
             BorderRenderer.render(guiGraphics, x, y, stack);
         }
     }

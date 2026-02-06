@@ -1,6 +1,5 @@
 package net.tokyosu.itemoverlayborder.mixin.jei;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import mezz.jei.api.ingredients.rendering.BatchRenderElement;
 import mezz.jei.library.render.ItemStackRenderer;
 import mezz.jei.library.render.batch.ElementWithModel;
@@ -33,23 +32,26 @@ public class ItemStackBatchRendererMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     public void render(GuiGraphics guiGraphics, Minecraft minecraft, ItemRenderer itemRenderer, ItemStackRenderer itemStackRenderer, CallbackInfo ci) {
-        RenderSystem.enableBlend();
         if (!noBlockLight.isEmpty()) {
-            for (ElementWithModel element : noBlockLight) {
-                BorderRenderer.render(guiGraphics, element.x(), element.y(), element.stack());
+            for (final var element : noBlockLight) {
+                final var stack = element.stack();
+                if (stack.isEmpty()) continue;
+                BorderRenderer.render(guiGraphics, element.x(), element.y(), stack);
             }
         }
 
         if (!useBlockLight.isEmpty()) {
-            for (ElementWithModel element : useBlockLight) {
-                BorderRenderer.render(guiGraphics, element.x(), element.y(), element.stack());
+            for (final var element : useBlockLight) {
+                final var stack = element.stack();
+                if (stack.isEmpty()) continue;
+                BorderRenderer.render(guiGraphics, element.x(), element.y(), stack);
             }
         }
 
-        RenderSystem.disableBlend();
-        for (BatchRenderElement<ItemStack> element : customRender) {
-            ItemStack ingredient = element.ingredient();
-            BorderRenderer.render(guiGraphics, element.x(), element.y(), ingredient);
+        for (final var element : customRender) {
+            final var stack = element.ingredient();
+            if (stack.isEmpty()) continue;
+            BorderRenderer.render(guiGraphics, element.x(), element.y(), stack);
         }
     }
 }

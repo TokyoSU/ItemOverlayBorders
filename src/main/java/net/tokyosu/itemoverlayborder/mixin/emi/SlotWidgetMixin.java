@@ -21,10 +21,11 @@ public abstract class SlotWidgetMixin {
 
     @Inject(method = "drawStack", at = @At("TAIL"))
     public void drawStack(GuiGraphics draw, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        final var stack = getStack();
-        Bounds bounds = getBounds();
+        final var stack = getStack().getEmiStacks().get(0).getItemStack();
+        if (stack.isEmpty()) return;
+        final var bounds = getBounds();
         int xOff = (bounds.width() - 16) / 2;
         int yOff = (bounds.height() - 16) / 2;
-        BorderRenderer.render(draw, bounds.x() + xOff, bounds.y() + yOff, stack.getEmiStacks().get(0).getItemStack());
+        BorderRenderer.render(draw, bounds.x() + xOff, bounds.y() + yOff, stack);
     }
 }

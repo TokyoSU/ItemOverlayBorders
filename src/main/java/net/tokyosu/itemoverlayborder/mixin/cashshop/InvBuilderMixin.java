@@ -17,6 +17,7 @@ public class InvBuilderMixin {
 
     @Inject(method = "drawIcon", at = @At("RETURN"))
     public void drawIcon(ItemStack stack, int x, int y, CallbackInfo ci) {
+        if (stack.isEmpty()) return;
         BorderRenderer.render(this.pGui, x, y, stack);
     }
 }
