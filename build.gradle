@@ -93,7 +93,8 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     // Required and optionals mods.
     runtimeOnly fg.deobf("curse.maven:obscure-tooltips-715660:7333749")
-	runtimeOnly fg.deobf("curse.maven:custom-rarity-1037072:7560440")
+    runtimeOnly fg.deobf("curse.maven:custom-rarity-1037072:7579570")
+    implementation fg.deobf("curse.maven:cashshop-1292635:7583909")
     implementation fg.deobf("curse.maven:jei-238222:7391695")
     implementation fg.deobf("curse.maven:fragmentum-1123970:7533135")
     implementation fg.deobf("curse.maven:kubejs-238086:5853326")
