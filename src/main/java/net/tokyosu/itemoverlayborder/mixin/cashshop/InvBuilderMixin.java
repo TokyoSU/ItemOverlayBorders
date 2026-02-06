@@ -1,4 +1,4 @@
-package net.tokyosu.itemoverlayborder.mixin;
+package net.tokyosu.itemoverlayborder.mixin.cashshop;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;

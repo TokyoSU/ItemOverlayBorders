@@ -5,11 +5,14 @@
   "refmap": "itemoverlayborder.refmap.json",
   "minVersion": "0.8",
   "client": [
-    "AbstractContainerScreenMixin",
-    "GuiMixin"
+    "minecraft.AbstractContainerScreenMixin",
+    "minecraft.GuiMixin"
   ],
   "mixins": [
-    "InvBuilderMixin",
-    "ItemStackBatchRendererMixin"
+    "cashshop.InvBuilderMixin",
+    "emi.SlotWidgetMixin",
+    "emi.StackBatcherMixin",
+    "jei.ItemStackBatchRendererMixin",
+    "jei.SafeIngredientUtilMixin"
   ]
 }

@@ -1,4 +1,4 @@
-package net.tokyosu.itemoverlayborder.mixin;
+package net.tokyosu.itemoverlayborder.mixin.minecraft;
 
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;

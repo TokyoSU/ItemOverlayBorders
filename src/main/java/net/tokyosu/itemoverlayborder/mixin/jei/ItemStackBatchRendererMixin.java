@@ -1,4 +1,4 @@
-package net.tokyosu.itemoverlayborder.mixin;
+package net.tokyosu.itemoverlayborder.mixin.jei;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import mezz.jei.api.ingredients.rendering.BatchRenderElement;
@@ -31,7 +31,7 @@ public class ItemStackBatchRendererMixin {
     @Shadow @Final @Mutable
     private List<BatchRenderElement<ItemStack>> customRender;
 
-    @Inject(method = "render", at = @At("HEAD"))
+    @Inject(method = "render", at = @At("TAIL"))
     public void render(GuiGraphics guiGraphics, Minecraft minecraft, ItemRenderer itemRenderer, ItemStackRenderer itemStackRenderer, CallbackInfo ci) {
         RenderSystem.enableBlend();
         if (!noBlockLight.isEmpty()) {
