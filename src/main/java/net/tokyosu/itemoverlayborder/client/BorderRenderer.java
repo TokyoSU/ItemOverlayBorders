@@ -1,28 +1,20 @@
 package net.tokyosu.itemoverlayborder.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
+import net.tokyosu.apocalypselib.utils.RarityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
-
-import java.util.HashMap;
-import java.util.Objects;
 
 /**
  * Render an animated border using rarity color.
  */
 public class BorderRenderer {
-    protected static final @NotNull TextColor WHITE_COLOR = Objects.requireNonNull(TextColor.fromLegacyFormat(ChatFormatting.WHITE));
-    protected static final HashMap<Rarity, Style> RARITY_CACHE = new HashMap<>();
     private static final int SIZE = 16;
     private static final int PERIMETER = 4 * SIZE; // 4 border
     private static final int[] PX = new int[PERIMETER];
@@ -95,27 +87,6 @@ public class BorderRenderer {
     }
 
     /**
-     * Get rarity style by ItemStack and cache it.
-     * @param stack A valid ItemStack.
-     * @return A valid rarity style.
-     */
-    public static @NotNull Style getRarityStyle(@NotNull ItemStack stack) {
-        return RARITY_CACHE.computeIfAbsent(stack.getRarity(), (e) -> stack.getRarity().getStyleModifier().apply(Style.EMPTY));
-    }
-
-    /**
-     * Check if a given ItemStack have common rarity.
-     * @param stack A valid ItemStack.
-     * @return True if rarity is common, false otherwise.
-     */
-    public static boolean isRarityCommon(@NotNull ItemStack stack) {
-        var style = getRarityStyle(stack);
-        var styleColor = style.getColor();
-        if (styleColor == null) return false; // Avoid crash if TextColor is undefined !
-        return styleColor == WHITE_COLOR;
-    }
-
-    /**
      * Get a rarity ARGB color from this style.
      * @param style A valid rarity style.
      * @return ARGB color or white if rarity color is null.
@@ -134,14 +105,14 @@ public class BorderRenderer {
      * @param stack A valid ItemStack.
      */
     public static void render(@NotNull GuiGraphics graphics, int x, int y, @NotNull ItemStack stack) {
-        if (isRarityCommon(stack)) return; // Avoid common rarity.
+        if (RarityUtils.isCommon(stack)) return; // Avoid common rarity.
 
         // Check if player is inside a level before doing anything.
         var mc = Minecraft.getInstance();
         if (mc.level == null) return;
 
         // Time and color calculation.
-        var color = getRarityARGB(getRarityStyle(stack));
+        var color = getRarityARGB(RarityUtils.getStyle(stack));
         var r = (float)FastColor.ARGB32.red(color) / 255.0f;
         var g = (float)FastColor.ARGB32.green(color) / 255.0f;
         var b = (float)FastColor.ARGB32.blue(color) / 255.0f;
