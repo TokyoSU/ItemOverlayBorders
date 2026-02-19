@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemStack;
 import net.tokyosu.apocalypselib.utils.RarityUtils;
+import net.tokyosu.itemoverlayborder.ItemOverlayConfig;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
@@ -79,7 +80,7 @@ public class BorderRenderer {
             y2 = j;
         }
 
-        var vc = graphics.bufferSource().getBuffer(RenderType.gui());
+        var vc = graphics.bufferSource().getBuffer(RenderType.guiOverlay());
         vc.vertex(mat, (float)x1, (float)y1, 0).color(r, g, b, a).endVertex();
         vc.vertex(mat, (float)x1, (float)y2, 0).color(r, g, b, a).endVertex();
         vc.vertex(mat, (float)x2, (float)y2, 0).color(r, g, b, a).endVertex();
@@ -118,24 +119,26 @@ public class BorderRenderer {
         var b = (float)FastColor.ARGB32.blue(color) / 255.0f;
         var ticks = mc.level.getGameTime();
         var partial = mc.getFrameTime(); // 0..1
-        var time = ticks + partial;
+        var time = ItemOverlayConfig.DISABLE_ANIMATION.get() ? 0.5F : ticks + partial;
         var pixelsPerSecond = 20.0f; // slow, smooth
         var timeSeconds = time / 20.0f; // convert ticks → seconds
         var head = (timeSeconds * pixelsPerSecond) % PERIMETER;
         var mirror = (head + 32.0f) % PERIMETER;
 
-        // Enable basic states.
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         RenderSystem.disableDepthTest();
+        RenderSystem.enableBlend();
 
         // Now draw pixels.
         for (int i = 0; i < PERIMETER; i++) {
-            var intensity = Math.max(brightness(i, head), brightness(i, mirror));
-            if (intensity <= 0) continue;
+            float intensity = Math.max(brightness(i, head), brightness(i, mirror));
+            if (intensity <= 0.0F) continue;
+
             int px = x + PX[i];
             int py = y + PY[i];
             fill(graphics, px, py, px+1, py+1, r, g, b, intensity);
         }
+
+        RenderSystem.disableBlend();
+        RenderSystem.enableDepthTest();
     }
 }

@@ -13,6 +13,7 @@
     "emi.SlotWidgetMixin",
     "emi.StackBatcherMixin",
     "jei.ItemStackBatchRendererMixin",
-    "jei.SafeIngredientUtilMixin"
+    "jei.SafeIngredientUtilMixin",
+    "rei.EntryWidgetMixin"
   ]
 }
