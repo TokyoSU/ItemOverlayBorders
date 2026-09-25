@@ -80,7 +80,7 @@ public class BorderRenderer {
             y2 = j;
         }
 
-        var vc = graphics.bufferSource().getBuffer(RenderType.guiOverlay());
+        var vc = graphics.bufferSource().getBuffer(RenderType.gui());
         vc.vertex(mat, (float)x1, (float)y1, 0).color(r, g, b, a).endVertex();
         vc.vertex(mat, (float)x1, (float)y2, 0).color(r, g, b, a).endVertex();
         vc.vertex(mat, (float)x2, (float)y2, 0).color(r, g, b, a).endVertex();
@@ -125,8 +125,9 @@ public class BorderRenderer {
         var head = (timeSeconds * pixelsPerSecond) % PERIMETER;
         var mirror = (head + 32.0f) % PERIMETER;
 
-        RenderSystem.disableDepthTest();
         RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableDepthTest();
 
         // Now draw pixels.
         for (int i = 0; i < PERIMETER; i++) {
@@ -137,9 +138,9 @@ public class BorderRenderer {
             int py = y + PY[i];
             fill(graphics, px, py, px+1, py+1, r, g, b, intensity);
         }
-
         graphics.flush();
-        RenderSystem.disableBlend();
+
         RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
     }
 }

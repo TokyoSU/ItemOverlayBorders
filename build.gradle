@@ -81,6 +81,7 @@ dependencies {
     // Apply Mixin AP
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     // Required and optionals mods.
+    runtimeOnly fg.deobf("curse.maven:re-avaritia-623969:8838608")
     runtimeOnly fg.deobf("curse.maven:fragmentum-1123970:7533135") // Dependencies of RarityJS.
     runtimeOnly fg.deobf("curse.maven:obscure-tooltips-715660:7333749")
     runtimeOnly fg.deobf("curse.maven:custom-rarity-1037072:7579570")
