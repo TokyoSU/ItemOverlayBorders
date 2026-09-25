@@ -28,6 +28,5 @@ public abstract class EntryWidgetMixin {
         ItemStack stack = entry.castValue();
         var innerBounds = this.getInnerBounds();
         BorderRenderer.render(graphics, innerBounds.x, innerBounds.y, stack);
-        graphics.flush();
     }
 }

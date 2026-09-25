@@ -138,6 +138,7 @@ public class BorderRenderer {
             fill(graphics, px, py, px+1, py+1, r, g, b, intensity);
         }
 
+        graphics.flush();
         RenderSystem.disableBlend();
         RenderSystem.enableDepthTest();
     }
