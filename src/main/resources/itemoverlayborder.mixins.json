@@ -1,19 +1,18 @@
 {
   "required": true,
   "package": "net.tokyosu.itemoverlayborder.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "plugin": "net.tokyosu.itemoverlayborder.mixin.ItemOverlayMixinPlugin",
   "refmap": "itemoverlayborder.refmap.json",
+  "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [
-    "minecraft.AbstractContainerScreenMixin",
-    "minecraft.GuiMixin"
-  ],
-  "mixins": [
-    "cashshop.InvBuilderMixin",
+    "minecraft.GuiGraphicsMixin",
+    "obscuretooltips.ToolPreviewComponentMixin",
+	"obscuretooltips.TooltipIconMixin",
     "emi.SlotWidgetMixin",
     "emi.StackBatcherMixin",
-    "jei.ItemStackBatchRendererMixin",
-    "jei.SafeIngredientUtilMixin",
-    "rei.EntryWidgetMixin"
+	"rei.BatchedEntryRendererManagerMixin",
+	"rei.EntryWidgetMixin",
+    "jei.ItemStackBatchRendererMixin"
   ]
 }

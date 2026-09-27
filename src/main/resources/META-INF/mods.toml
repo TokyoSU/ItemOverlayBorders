@@ -53,7 +53,7 @@ side="BOTH"
 [[dependencies."${mod_id}"]]
 modId = "apocalypselib"
 mandatory = true
-versionRange = "[1.1.5,)"
+versionRange = "[1.1.7,)"
 ordering = "AFTER"
 side = "BOTH"
 

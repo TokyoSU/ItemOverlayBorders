@@ -3,94 +3,59 @@ package net.tokyosu.itemoverlayborder.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Style;
-import net.minecraft.util.FastColor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.tokyosu.apocalypselib.utils.RarityUtils;
+import net.tokyosu.itemoverlayborder.ItemOverlayBorder;
 import net.tokyosu.itemoverlayborder.ItemOverlayConfig;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
+
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
- * Render an animated border using rarity color.
+ * Renders the animated rarity border using a vertically stacked 16x16 texture.
  */
-public class BorderRenderer {
+public final class BorderRenderer {
+    private static final Map<Rarity, BorderColor> RARITY_MAP = new WeakHashMap<>();
+    private static final ThreadLocal<Integer> SUPPRESSION_DEPTH = ThreadLocal.withInitial(() -> 0);
+    private static final ResourceLocation BORDER_TEXTURE = ResourceLocation.fromNamespaceAndPath(ItemOverlayBorder.MOD_ID, "textures/gui/animated_border.png");
+    private static final int DEPTH = 0;
     private static final int SIZE = 16;
-    private static final int PERIMETER = 4 * SIZE; // 4 border
-    private static final int[] PX = new int[PERIMETER];
-    private static final int[] PY = new int[PERIMETER];
+    private static final int FRAME_COUNT = 64;
+    private static final int TEXTURE_WIDTH = SIZE;
+    private static final int TEXTURE_HEIGHT = SIZE * FRAME_COUNT;
 
     /**
-     * Precompute perimeter to avoid allocating PX/PY during loop.
+     * Temporarily prevents borders from being rendered by nested GuiGraphics item draws.
      */
-    public static void initialize() {
-        // PERIMETER must be 4 * SIZE.
-        // PX/PY must be sized to PERIMETER.
-        for (int p = 0; p < PERIMETER; p++) {
-            if (p < SIZE) { // top: left -> right
-                PX[p] = p;
-                PY[p] = 0;
-            } else if (p < 2 * SIZE) { // right: top -> bottom
-                PX[p] = SIZE - 1;
-                PY[p] = p - SIZE;
-            } else if (p < 3 * SIZE) { // bottom: right -> left
-                PX[p] = (3 * SIZE - 1) - p;
-                PY[p] = SIZE - 1;
-            } else { // left: bottom -> top
-                PX[p] = 0;
-                PY[p] = (4 * SIZE - 1) - p;
-            }
-        }
+    public static void pushSuppression() {
+        SUPPRESSION_DEPTH.set(SUPPRESSION_DEPTH.get() + 1);
     }
 
     /**
-     * Calculate brightness based on current position and last.
-     * @return The more headPose is far or pixelPose the more it will be transparent.
+     * Restores border rendering after a matching {@link #pushSuppression()} call.
      */
-    private static float brightness(float pixelPos, float headPos) {
-        float d = Math.abs(pixelPos - headPos);
-        d = Math.min(d, PERIMETER - d); // wrap-around
-        return Math.max(0.0f, 1.0f - d / SIZE); // fade length = 16px
+    public static void popSuppression() {
+        int depth = SUPPRESSION_DEPTH.get();
+        if (depth <= 1) {
+            SUPPRESSION_DEPTH.remove();
+        } else {
+            SUPPRESSION_DEPTH.set(depth - 1);
+        }
+    }
+
+    public static boolean isSuppressed() {
+        return SUPPRESSION_DEPTH.get() > 0;
     }
 
     /**
-     * Custom implementation of GuiGraphics.fill() without flush() and float ARGB color passed directly to vertex color.
-     * @param graphics A valid gui graphics.
-     * @param x1 Starting X point.
-     * @param y1 Starting Y point.
-     * @param x2 End X point.
-     * @param y2 End Y point.
-     * @param r Red component.
-     * @param g Green component.
-     * @param b Blue component.
-     * @param a Alpha component.
-     */
-    private static void fill(@NotNull GuiGraphics graphics, int x1, int y1, int x2, int y2, float r, float g, float b, float a) {
-        Matrix4f mat = graphics.pose().last().pose();
-
-        if (x1 < x2) {
-            int i = x1;
-            x1 = x2;
-            x2 = i;
-        }
-        if (y1 < y2) {
-            int j = y1;
-            y1 = y2;
-            y2 = j;
-        }
-
-        var vc = graphics.bufferSource().getBuffer(RenderType.gui());
-        vc.vertex(mat, (float)x1, (float)y1, 0).color(r, g, b, a).endVertex();
-        vc.vertex(mat, (float)x1, (float)y2, 0).color(r, g, b, a).endVertex();
-        vc.vertex(mat, (float)x2, (float)y2, 0).color(r, g, b, a).endVertex();
-        vc.vertex(mat, (float)x2, (float)y1, 0).color(r, g, b, a).endVertex();
-    }
-
-    /**
-     * Get a rarity ARGB color from this style.
-     * @param style A valid rarity style.
-     * @return ARGB color or white if rarity color is null.
+     * Gets the rarity RGB color from a style.
+     *
+     * @param style rarity style
+     * @return packed RGB color, or white if no color is defined
      */
     public static int getRarityARGB(@NotNull Style style) {
         var styleColor = style.getColor();
@@ -99,47 +64,52 @@ public class BorderRenderer {
     }
 
     /**
-     * Render a animated border.
-     * @param graphics A valid GUI graphics.
-     * @param x Starting X position.
-     * @param y Starting Y position.
-     * @param stack A valid ItemStack.
+     * Renders a single 16x16 frame from the vertical animation texture and tints it
+     * with the item's rarity color.
      */
     public static void render(@NotNull GuiGraphics graphics, int x, int y, @NotNull ItemStack stack) {
-        if (RarityUtils.isCommon(stack)) return; // Avoid common rarity.
+        if (isSuppressed() || stack.isEmpty() || RarityUtils.isCommon(stack)) return;
 
-        // Check if player is inside a level before doing anything.
         var mc = Minecraft.getInstance();
         if (mc.level == null) return;
 
-        // Time and color calculation.
-        var color = getRarityARGB(RarityUtils.getStyle(stack));
-        var r = (float)FastColor.ARGB32.red(color) / 255.0f;
-        var g = (float)FastColor.ARGB32.green(color) / 255.0f;
-        var b = (float)FastColor.ARGB32.blue(color) / 255.0f;
-        var ticks = mc.level.getGameTime();
-        var partial = mc.getFrameTime(); // 0..1
-        var time = ItemOverlayConfig.DISABLE_ANIMATION.get() ? 0.5F : ticks + partial;
-        var pixelsPerSecond = 20.0f; // slow, smooth
-        var timeSeconds = time / 20.0f; // convert ticks → seconds
-        var head = (timeSeconds * pixelsPerSecond) % PERIMETER;
-        var mirror = (head + 32.0f) % PERIMETER;
+        BorderColor color = RARITY_MAP.computeIfAbsent(stack.getRarity(), BorderColor::new);
+
+        int frame;
+        if (ItemOverlayConfig.DISABLE_ANIMATION.get()) {
+            frame = 0;
+        } else {
+            // The old renderer advanced the head by exactly 20 pixels/second.
+            // At 20 game ticks/second this is one perimeter pixel (one exported
+            // texture frame) per tick, wrapping after all 64 perimeter positions.
+            frame = (int) (mc.level.getGameTime() % FRAME_COUNT);
+        }
+
+        int v = frame * SIZE;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableDepthTest();
+        RenderSystem.setShaderColor(color.R, color.G, color.B, 1.0F);
 
-        // Now draw pixels.
-        for (int i = 0; i < PERIMETER; i++) {
-            float intensity = Math.max(brightness(i, head), brightness(i, mirror));
-            if (intensity <= 0.0F) continue;
+        graphics.blit(
+                BORDER_TEXTURE,
+                x,
+                y,
+                DEPTH,
+                0.0F,
+                (float)v,
+                SIZE,
+                SIZE,
+                TEXTURE_WIDTH,
+                TEXTURE_HEIGHT
+        );
 
-            int px = x + PX[i];
-            int py = y + PY[i];
-            fill(graphics, px, py, px+1, py+1, r, g, b, intensity);
-        }
+        // The shader color is global state. Flush before restoring it so this
+        // border is submitted with its rarity tint and later GUI draws stay white.
         graphics.flush();
 
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
     }

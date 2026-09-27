@@ -2,25 +2,27 @@ package net.tokyosu.itemoverlayborder.mixin.emi;
 
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.widget.Bounds;
-import dev.emi.emi.api.widget.SlotWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.tokyosu.itemoverlayborder.client.BorderRenderer;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = SlotWidget.class, remap = false)
+@Pseudo
+@Mixin(targets = "dev.emi.emi.api.widget.SlotWidget", remap = false)
 public abstract class SlotWidgetMixin {
-    @Shadow
+    @Shadow @NotNull
     public abstract EmiIngredient getStack();
 
-    @Shadow
+    @Shadow @NotNull
     public abstract Bounds getBounds();
 
     @Inject(method = "drawStack", at = @At("TAIL"))
-    public void drawStack(GuiGraphics draw, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    public void drawStack(@NotNull GuiGraphics draw, int mouseX, int mouseY, float delta, @NotNull CallbackInfo ci) {
         final var stack = getStack().getEmiStacks().get(0).getItemStack();
         if (stack.isEmpty()) return;
         final var bounds = getBounds();
