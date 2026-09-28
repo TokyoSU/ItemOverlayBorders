@@ -21,10 +21,11 @@ import net.tokyosu.itemoverlayborder.client.BorderRenderer;
 public abstract class TooltipIconMixin {
     @Inject(method = "render", at = @At("HEAD"), require = 0)
     private void itemoverlayborder$beginSuppress(@NotNull TooltipState state, @NotNull GuiGraphics graphics, int x, int y, @NotNull CallbackInfo ci) {
-    	if (!state.stack.isEmpty()) {
-            BorderRenderer.render(graphics, x - 8, y - 8, state.stack);
-        }
-        BorderRenderer.pushSuppression(); // Avoid duplication.
+    	 BorderRenderer.pushSuppression();
+
+         if (!state.stack.isEmpty()) {
+             BorderRenderer.renderForced(graphics, x - 8, y - 8, state.stack);
+         }
     }
 
     @Inject(method = "render", at = @At("RETURN"), require = 0)

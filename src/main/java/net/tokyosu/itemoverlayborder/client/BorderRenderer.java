@@ -3,7 +3,6 @@ package net.tokyosu.itemoverlayborder.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -27,7 +26,7 @@ public final class BorderRenderer {
     private static final int FRAME_COUNT = 64;
     private static final int TEXTURE_WIDTH = SIZE;
     private static final int TEXTURE_HEIGHT = SIZE * FRAME_COUNT;
-
+    
     /**
      * Temporarily prevents borders from being rendered by nested GuiGraphics item draws.
      */
@@ -51,45 +50,31 @@ public final class BorderRenderer {
         return SUPPRESSION_DEPTH.get() > 0;
     }
 
-    /**
-     * Gets the rarity RGB color from a style.
-     *
-     * @param style rarity style
-     * @return packed RGB color, or white if no color is defined
-     */
-    public static int getRarityARGB(@NotNull Style style) {
-        var styleColor = style.getColor();
-        if (styleColor == null) return 0xFFFFFFFF;
-        return styleColor.getValue();
+    public static void render(@NotNull GuiGraphics graphics, int x, int y, @NotNull ItemStack stack) {
+        if (isSuppressed()) return;
+        renderInternal(graphics, x, y, stack);
     }
 
-    /**
-     * Renders a single 16x16 frame from the vertical animation texture and tints it
-     * with the item's rarity color.
-     */
-    public static void render(@NotNull GuiGraphics graphics, int x, int y, @NotNull ItemStack stack) {
-        if (isSuppressed() || stack.isEmpty() || RarityUtils.isCommon(stack)) return;
+    public static void renderForced(@NotNull GuiGraphics graphics, int x, int y, @NotNull ItemStack stack) {
+        renderInternal(graphics, x, y, stack);
+    }
+
+    private static void renderInternal(@NotNull GuiGraphics graphics, int x, int y, @NotNull ItemStack stack) {
+        if (stack.isEmpty() || RarityUtils.isCommon(stack)) return;
 
         var mc = Minecraft.getInstance();
         if (mc.level == null) return;
 
-        BorderColor color = RARITY_MAP.computeIfAbsent(stack.getRarity(), BorderColor::new);
+        BorderColor color = RARITY_MAP.computeIfAbsent(
+                stack.getRarity(),
+                BorderColor::new
+        );
 
-        int frame;
-        if (ItemOverlayConfig.DISABLE_ANIMATION.get()) {
-            frame = 0;
-        } else {
-            // The old renderer advanced the head by exactly 20 pixels/second.
-            // At 20 game ticks/second this is one perimeter pixel (one exported
-            // texture frame) per tick, wrapping after all 64 perimeter positions.
-            frame = (int) (mc.level.getGameTime() % FRAME_COUNT);
-        }
-
+        int frame = ItemOverlayConfig.DISABLE_ANIMATION.get() ? 0 : (int) (mc.level.getGameTime() % FRAME_COUNT);
         int v = frame * SIZE;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.disableDepthTest();
         RenderSystem.setShaderColor(color.R, color.G, color.B, 1.0F);
 
         graphics.blit(
@@ -105,12 +90,9 @@ public final class BorderRenderer {
                 TEXTURE_HEIGHT
         );
 
-        // The shader color is global state. Flush before restoring it so this
-        // border is submitted with its rarity tint and later GUI draws stay white.
         graphics.flush();
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
     }
 }
