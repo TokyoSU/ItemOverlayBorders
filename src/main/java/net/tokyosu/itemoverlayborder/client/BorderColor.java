@@ -1,9 +1,7 @@
 package net.tokyosu.itemoverlayborder.client;
 
-import net.minecraft.network.chat.Style;
-import net.minecraft.util.FastColor;
+import net.tokyosu.apocalypselib.utils.ColorUtils;
 import net.minecraft.world.item.Rarity;
-import net.tokyosu.apocalypselib.utils.RarityUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class BorderColor {
@@ -12,15 +10,10 @@ public class BorderColor {
     public float B = 1.0F;
 
     public BorderColor(@NotNull Rarity rarity) {
-        int color = this.getRarityARGB(RarityUtils.getStyleByRarity(rarity));
-        this.R = FastColor.ARGB32.red(color) / 255.0F;
-        this.G = FastColor.ARGB32.green(color) / 255.0F;
-        this.B = FastColor.ARGB32.blue(color) / 255.0F;
+        int color = ColorUtils.getRGBFromRarity(rarity, 0xFFFFFF);
+        this.R = ColorUtils.getRedFloat(color);
+        this.G = ColorUtils.getGreenFloat(color);
+        this.B = ColorUtils.getBlueFloat(color);
     }
 
-    private int getRarityARGB(@NotNull Style style) {
-        var styleColor = style.getColor();
-        if (styleColor == null) return 0xFFFFFFFF;
-        return styleColor.getValue();
-    }
 }

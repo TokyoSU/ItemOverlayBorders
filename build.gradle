@@ -59,6 +59,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+
     maven {
         url "https://cursemaven.com"
     }
@@ -98,7 +99,7 @@ dependencies {
     compileOnly fg.deobf("curse.maven:emi-580555:6420945")
     compileOnly fg.deobf("curse.maven:roughly-enough-items-310111:5846923")
     
-    implementation fg.deobf("curse.maven:apocalypselib-1455735:8910607")
+	implementation fg.deobf("curse.maven:apocalypselib-1455735:9019998")
     implementation fg.deobf("curse.maven:kubejs-238086:5853326")
     implementation fg.deobf("curse.maven:rhino-416294:6186971")
     implementation fg.deobf("curse.maven:architectury-api-419699:5137938")

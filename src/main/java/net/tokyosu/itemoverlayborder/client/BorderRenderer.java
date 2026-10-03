@@ -10,7 +10,6 @@ import net.tokyosu.apocalypselib.utils.RarityUtils;
 import net.tokyosu.itemoverlayborder.ItemOverlayBorder;
 import net.tokyosu.itemoverlayborder.ItemOverlayConfig;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -26,7 +25,7 @@ public final class BorderRenderer {
     private static final int FRAME_COUNT = 64;
     private static final int TEXTURE_WIDTH = SIZE;
     private static final int TEXTURE_HEIGHT = SIZE * FRAME_COUNT;
-    
+
     /**
      * Temporarily prevents borders from being rendered by nested GuiGraphics item draws.
      */
